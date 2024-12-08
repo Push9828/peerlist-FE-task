@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { ModalProps } from "@/types/components";
+import { ModalProps, QuestionItem } from "@/types/components";
 
 const dropdownOptions = [
   { id: 1, icon: "/icons/short-answer-icon.svg", text: "Short answer" },
@@ -13,29 +13,23 @@ const dropdownOptions = [
 export const QuestionsModal = ({
   isOpen,
   onClose,
-  setQuestionType,
+  setQuestions,
 }: ModalProps) => {
   const modalRef = useRef<HTMLDivElement>(null);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(true);
 
   const handleOutsideClick = (event: MouseEvent) => {
     if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
       onClose();
-      setIsDropdownOpen(false);
     }
   };
 
   useEffect(() => {
     if (isOpen) {
       document.addEventListener("click", handleOutsideClick);
-    } else {
-      document.removeEventListener("click", handleOutsideClick);
+      return () => document.removeEventListener("click", handleOutsideClick);
     }
-
-    return () => {
-      document.removeEventListener("click", handleOutsideClick);
-    };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   const renderDropdown = () => (
     <ul
@@ -46,9 +40,11 @@ export const QuestionsModal = ({
           key={option.id}
           className="flex items-center text-xs font-medium px-4 py-2 hover:bg-gray-100 cursor-pointer"
           onClick={() => {
-            setQuestionType(option.id);
+            setQuestions((prevQuestions: QuestionItem[]) => [
+              ...prevQuestions,
+              { type: option.id },
+            ]);
             onClose();
-            setIsDropdownOpen(false);
           }}
         >
           <img src={option.icon} alt={option.text} className="mr-3 " />
@@ -66,7 +62,7 @@ export const QuestionsModal = ({
         ref={modalRef}
         className="bg-[#FAFBFC] p-6 rounded-3xl h-72 w-96 shadow-lg"
       >
-        <div className="relative">
+        <div>
           <button
             onClick={() => setIsDropdownOpen((prev) => !prev)}
             className="bg-gray-100 px-4 py-2 rounded-md flex items-center justify-between w-full"

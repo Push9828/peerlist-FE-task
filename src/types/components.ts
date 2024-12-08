@@ -10,5 +10,17 @@ export type ButtonProps = {
 export type ModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  setQuestionType: React.Dispatch<React.SetStateAction<number | null>>;
+  setQuestions: React.Dispatch<React.SetStateAction<QuestionItem[]>>;
+};
+
+export type questions = {
+  questionsData: QuestionItem[];
+  setQuestions: React.Dispatch<React.SetStateAction<QuestionItem[]>>;
+};
+
+export type QuestionItem = {
+  type?: number;
+  title?: string;
+  helpText?: string;
+  options?: string[];
 };
