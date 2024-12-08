@@ -1,12 +1,13 @@
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/Button";
+import { QuestionsModal } from "@/components/QuestionsModal";
 
 export default function Home() {
   const [formTitle, setFormTitle] = useState("");
   const [questions, setQuestions] = useState<string[]>([]);
-
-  console.log(questions.length);
+  const [isQuestionsModalOpen, setIsQuestionsModalOpen] = useState(false);
+  const [questionType, setQuestionType] = useState<number | null>(null);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormTitle(e.target.value);
@@ -36,6 +37,7 @@ export default function Home() {
           iconPosition="before"
           isPrimary
           icon="/icons/plus-icon.svg"
+          onClick={() => setIsQuestionsModalOpen(true)}
         />
       </div>
       <div className=" mt-auto">
@@ -56,6 +58,12 @@ export default function Home() {
           />
         </div>
       </div>
+
+      <QuestionsModal
+        isOpen={isQuestionsModalOpen}
+        onClose={() => setIsQuestionsModalOpen(false)}
+        setQuestionType={setQuestionType}
+      />
     </main>
   );
 }

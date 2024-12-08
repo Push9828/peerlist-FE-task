@@ -6,3 +6,9 @@ export type ButtonProps = {
   onClick?: () => void;
   disabled?: boolean;
 };
+
+export type ModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  setQuestionType: React.Dispatch<React.SetStateAction<number | null>>;
+};

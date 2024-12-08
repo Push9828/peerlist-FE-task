@@ -8,10 +8,11 @@ export const Button = ({
   onClick,
   disabled = false,
 }: ButtonProps) => {
-  const baseClasses = "flex items-center font-semibold py-2 px-4 rounded-xl";
+  const baseClasses =
+    "flex items-center font-semibold text-sm py-2 px-4 rounded-xl";
 
   const buttonClass = isPrimary
-    ? "border border-[#E1E4E8] text-sm py-1.5 px-4 shadow-[0px_3px_3px_-1.5px_rgba(0,_0,_0,_0.031)] hover:shadow-[0px_3px_3px_-1.5px_rgba(0,_0,_0,_0.1)]"
+    ? "border border-[#E1E4E8]  py-1.5 px-4 shadow-[0px_3px_3px_-1.5px_rgba(0,_0,_0,_0.031)] hover:shadow-[0px_3px_3px_-1.5px_rgba(0,_0,_0,_0.1)]"
     : "bg-[#00AA45] border-[#1E874B] text-white text-sm py-1.5 px-4 hover:shadow-[0px_12px_12px_-6px_rgba(0,_0,_0,_0.08)] shadow-[0px_6px_6px_-3px_rgba(0,_0,_0,_0.08)]";
 
   const disabledClass = disabled
