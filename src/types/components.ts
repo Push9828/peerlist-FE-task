@@ -23,6 +23,8 @@ export type questions = {
   handleFormSubmit?: () => void;
   loading?: boolean;
   questionErrors: boolean[];
+  setProgress: React.Dispatch<React.SetStateAction<number>>;
+  progress: number;
 };
 
 export type QuestionItem = {

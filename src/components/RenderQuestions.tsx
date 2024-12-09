@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "./Button";
 import { QuestionItem, questions } from "@/types/components";
 
@@ -138,8 +138,22 @@ export const RenderQuestions = ({
   previewMode = false,
   handleFormSubmit,
   questionErrors,
+  setProgress,
+  progress,
 }: questions) => {
-  const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
+  const [dropdownStates, setDropdownStates] = useState<boolean[]>(
+    questionsData.map(() => false)
+  );
+
+  const toggleDropdown = (index: number) => {
+    setDropdownStates((prev) =>
+      prev.map((state, i) => (i === index ? !state : false))
+    );
+  };
+
+  const closeDropdowns = () => {
+    setDropdownStates(questionsData.map(() => false));
+  };
 
   const handleResponseChange = (index: number, value: string) => {
     const updatedQuestions = [...questionsData];
@@ -153,7 +167,23 @@ export const RenderQuestions = ({
     setQuestions(updatedQuestions);
   };
 
-  console.log(questionsData);
+  const calculateProgress = () => {
+    const answeredQuestions = questionsData.filter(
+      (question) => question.response && question.response.length > 0
+    );
+    const progressPercentage =
+      (answeredQuestions.length / questionsData.length) * 100;
+    setProgress(progressPercentage);
+  };
+
+  useEffect(() => {
+    setDropdownStates(questionsData.map(() => false));
+  }, [questionsData]);
+
+  useEffect(() => {
+    calculateProgress();
+    setDropdownStates(questionsData.map(() => false));
+  }, [questionsData]);
 
   return (
     <div>
@@ -188,7 +218,7 @@ export const RenderQuestions = ({
                   <div className="flex gap-4 items-center">
                     <div className="relative">
                       <button
-                        onClick={() => setIsDropdownOpen((prev) => !prev)}
+                        onClick={() => toggleDropdown(index)}
                         className="bg-white px-4 py-2 rounded-md flex items-center justify-between w-full"
                       >
                         <span className="flex font-semibold text-[#868686] text-xs">
@@ -219,10 +249,11 @@ export const RenderQuestions = ({
                           </svg>
                         </span>
                       </button>
-                      {isDropdownOpen && (
+                      {dropdownStates[index] && (
                         <ul
-                          className={`absolute bg-white border border-[#E1E4E8] rounded-lg shadow-lg w-full mt-2 z-99 origin-top`}
+                          className={`absolute bg-white border border-[#E1E4E8] rounded-lg shadow-lg w-full mt-2 z-20 origin-top`}
                         >
+                          <p>{dropdownStates[index]}</p>
                           {dropdownOptions.map((option) => (
                             <li
                               key={option.id}
@@ -236,7 +267,7 @@ export const RenderQuestions = ({
                                     setQuestions
                                   );
                                 }
-                                setIsDropdownOpen((prev) => !prev);
+                                closeDropdowns();
                               }}
                             >
                               <img src={option.icon} alt={option.text} />
@@ -353,22 +384,13 @@ export const RenderQuestions = ({
       })}
       {previewMode && (
         <div className="flex justify-end mr-4">
-          <Button text="Submit" onClick={handleFormSubmit} />
+          <Button
+            text="Submit"
+            onClick={handleFormSubmit}
+            disabled={progress !== 100}
+          />
         </div>
       )}
     </div>
   );
 };
-
-<style jsx>{`
-  input[type="radio"]:checked::before {
-    content: "";
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background-color: #00aa45;
-  }
-`}</style>;
