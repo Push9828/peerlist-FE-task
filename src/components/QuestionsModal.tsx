@@ -40,10 +40,12 @@ export const QuestionsModal = ({
           key={option.id}
           className="flex items-center text-xs font-medium px-4 py-2 hover:bg-gray-100 cursor-pointer"
           onClick={() => {
-            setQuestions((prevQuestions: QuestionItem[]) => [
-              ...prevQuestions,
-              { type: option.id },
-            ]);
+            if (setQuestions) {
+              setQuestions((prevQuestions: QuestionItem[]) => [
+                ...prevQuestions,
+                { type: option.id },
+              ]);
+            }
             onClose();
           }}
         >
