@@ -5,11 +5,18 @@ import { Button } from "@/components/Button";
 import { QuestionsModal } from "@/components/QuestionsModal";
 import { RenderQuestions } from "@/components/RenderQuestions";
 import { QuestionItem } from "@/types/components";
+import { SuccessModal } from "@/components/successModal";
 
 export default function Home() {
   const [formTitle, setFormTitle] = useState("");
   const [isQuestionsModalOpen, setIsQuestionsModalOpen] = useState(false);
+  const [isFormSubmitted, setIsFormSubmitted] = useState(false);
   const [questions, setQuestions] = useState<QuestionItem[]>([]);
+  const [previewState, setPreviewState] = useState<{
+    id: string | null;
+    isPreview: boolean;
+  }>({ id: null, isPreview: false });
+  const [loading, setLoading] = useState(false);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormTitle(e.target.value);
@@ -20,6 +27,8 @@ export default function Home() {
       alert("Form must have a title and at least one question.");
       return;
     }
+
+    setLoading(true);
 
     try {
       const payload = {
@@ -34,9 +43,8 @@ export default function Home() {
       });
 
       if (response.status === 200) {
-        alert("Form published successfully!");
-        setFormTitle("");
-        setQuestions([]);
+        const { newForm } = response.data;
+        setPreviewState({ id: newForm.id, isPreview: true });
       }
     } catch (error) {
       console.error("Error publishing form:", error);
@@ -45,7 +53,16 @@ export default function Home() {
       } else {
         alert("An unexpected error occurred.");
       }
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleFormSubmit = () => {
+    setIsFormSubmitted(true);
+    setPreviewState({ id: null, isPreview: false });
+    setQuestions([]);
+    setFormTitle("");
   };
 
   return (
@@ -58,13 +75,16 @@ export default function Home() {
           onChange={handleTitleChange}
           className="text-lg font-semibold border-none bg-transparent focus:outline-none"
         />
-        <Button
-          text="Preview"
-          iconPosition="after"
-          isPrimary
-          icon="/icons/link-icon.svg"
-          disabled={questions.length === 0}
-        />
+        {!previewState.isPreview && (
+          <Button
+            text="Preview"
+            iconPosition="after"
+            isPrimary
+            icon="/icons/link-icon.svg"
+            disabled={questions.length === 0}
+            onClick={() => setPreviewState({ id: null, isPreview: true })}
+          />
+        )}
       </div>
       <hr />
 
@@ -72,44 +92,58 @@ export default function Home() {
         <RenderQuestions
           questionsData={questions}
           setQuestions={setQuestions}
+          previewMode={previewState.isPreview}
+          handleFormSubmit={handleFormSubmit}
         />
       </div>
-      <div className="flex flex-col items-center">
-        <div>
-          <Button
-            text="Add Question"
-            iconPosition="before"
-            isPrimary
-            icon="/icons/plus-icon.svg"
-            onClick={() => setIsQuestionsModalOpen(true)}
-          />
+      {!previewState.isPreview && (
+        <div className="flex flex-col items-center">
+          <div>
+            <Button
+              text="Add Question"
+              iconPosition="before"
+              isPrimary
+              icon="/icons/plus-icon.svg"
+              onClick={() => setIsQuestionsModalOpen(true)}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       <div className=" mt-auto">
         <hr />
-        <div className="flex justify-between bg-[#F6F8FAE5] py-4 px-6">
-          <Button
-            text="Save as draft"
-            isPrimary
-            iconPosition="before"
-            icon="/icons/draft-icon.svg"
-            disabled={questions.length === 0}
-          />
-          <Button
-            text="Publish form"
-            iconPosition="before"
-            icon="/icons/check-icon.svg"
-            disabled={questions.length === 0}
-            onClick={handlePublishForm}
-          />
-        </div>
+        {!previewState.isPreview && (
+          <div className="flex justify-between bg-[#F6F8FAE5] py-4 px-6">
+            <Button
+              text="Save as draft"
+              isPrimary
+              iconPosition="before"
+              icon="/icons/draft-icon.svg"
+              disabled={questions.length === 0}
+            />
+            <Button
+              text="Publish form"
+              iconPosition="before"
+              icon="/icons/check-icon.svg"
+              disabled={questions.length === 0}
+              onClick={handlePublishForm}
+              loading={loading}
+            />
+          </div>
+        )}
       </div>
 
       <QuestionsModal
         isOpen={isQuestionsModalOpen}
         onClose={() => setIsQuestionsModalOpen(false)}
         setQuestions={setQuestions}
+      />
+
+      <SuccessModal
+        title="Form submitted successfully"
+        subText="Thank you for submitting your form. We will get back to you soon."
+        isOpen={isFormSubmitted}
+        onClose={() => setIsFormSubmitted(false)}
       />
     </main>
   );

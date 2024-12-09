@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json(
-      { message: "Form published successfully!" },
+      { message: "Form published successfully!", newForm: newForm },
       { status: 200 }
     );
   } catch (error) {
