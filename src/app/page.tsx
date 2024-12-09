@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import axios from "axios";
 import { Button } from "@/components/Button";
 import { QuestionsModal } from "@/components/QuestionsModal";
 import { RenderQuestions } from "@/components/RenderQuestions";
@@ -12,6 +13,39 @@ export default function Home() {
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormTitle(e.target.value);
+  };
+
+  const handlePublishForm = async () => {
+    if (!formTitle || questions.length === 0) {
+      alert("Form must have a title and at least one question.");
+      return;
+    }
+
+    try {
+      const payload = {
+        title: formTitle,
+        questions,
+      };
+
+      const response = await axios.post("/api/forms", payload, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.status === 200) {
+        alert("Form published successfully!");
+        setFormTitle("");
+        setQuestions([]);
+      }
+    } catch (error) {
+      console.error("Error publishing form:", error);
+      if (axios.isAxiosError(error) && error.response) {
+        alert(`Failed to publish form: ${error.response.data.message}`);
+      } else {
+        alert("An unexpected error occurred.");
+      }
+    }
   };
 
   return (
@@ -67,6 +101,7 @@ export default function Home() {
             iconPosition="before"
             icon="/icons/check-icon.svg"
             disabled={questions.length === 0}
+            onClick={handlePublishForm}
           />
         </div>
       </div>
