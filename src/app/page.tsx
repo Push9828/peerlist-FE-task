@@ -11,20 +11,31 @@ export default function Home() {
   const [formTitle, setFormTitle] = useState("");
   const [isQuestionsModalOpen, setIsQuestionsModalOpen] = useState(false);
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+  const [saveAsDraft, setSaveAsDraft] = useState(false);
   const [questions, setQuestions] = useState<QuestionItem[]>([]);
   const [previewState, setPreviewState] = useState<{
     id: string | null;
     isPreview: boolean;
   }>({ id: null, isPreview: false });
   const [loading, setLoading] = useState(false);
+  const [formTitleError, setformTitleError] = useState<boolean>(false);
+  const [questionErrors, setQuestionErrors] = useState<boolean[]>([]);
+  const [progress, setProgress] = useState<number>(0);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormTitle(e.target.value);
+    setformTitleError(false);
+  };
+
+  const validateQuestions = () => {
+    const errors = questions.map((question) => !question.title);
+    setQuestionErrors(errors);
+    return !errors.includes(true);
   };
 
   const handlePublishForm = async () => {
-    if (!formTitle || questions.length === 0) {
-      alert("Form must have a title and at least one question.");
+    if (!formTitle || !validateQuestions()) {
+      setformTitleError(true);
       return;
     }
 
@@ -65,35 +76,64 @@ export default function Home() {
     setFormTitle("");
   };
 
+  const handlePreview = () => {
+    if (!validateQuestions() || !formTitle) {
+      setformTitleError(true);
+    } else setPreviewState({ id: null, isPreview: true });
+  };
+
+  console.log(progress);
+
   return (
     <main className="flex flex-col min-h-screen max-w-2xl mx-auto border border-[#E1E4E8] ">
-      <div className="flex justify-between px-6 py-4">
+      {/* Header */}
+
+      <div className="flex gap-10 px-6 py-4">
         <input
           type="text"
           placeholder="Untitled Form"
           value={formTitle}
           onChange={handleTitleChange}
-          className="text-lg font-semibold border-none bg-transparent focus:outline-none"
+          className={`text-lg w-1/2 font-semibold border-none bg-transparent focus:outline-none  ${
+            formTitleError ? "placeholder-[#EB5757]" : ""
+          }`}
         />
-        {!previewState.isPreview && (
+        {previewState.isPreview ? (
+          <div className="flex flex-col items-center w-full max-w-xs ml-4">
+            <span className="text-sm  font-regular mb-2">
+              Form completeness — {progress}%
+            </span>
+            <div className="relative w-full h-2 bg-gray-200 rounded">
+              <div
+                className="absolute top-0 left-0 h-2 bg-[#00AA45] rounded"
+                style={{ width: `${Math.min(100, progress)}%` }}
+              ></div>
+            </div>
+          </div>
+        ) : (
           <Button
             text="Preview"
             iconPosition="after"
             isPrimary
             icon="/icons/link-icon.svg"
             disabled={questions.length === 0}
-            onClick={() => setPreviewState({ id: null, isPreview: true })}
+            onClick={handlePreview}
           />
         )}
       </div>
+
       <hr />
 
+      {/* Questions section */}
       <div className="my-6">
         <RenderQuestions
           questionsData={questions}
           setQuestions={setQuestions}
           previewMode={previewState.isPreview}
           handleFormSubmit={handleFormSubmit}
+          questionErrors={questionErrors}
+          setProgress={setProgress}
+          progress={progress}
         />
       </div>
       {!previewState.isPreview && (
@@ -110,6 +150,7 @@ export default function Home() {
         </div>
       )}
 
+      {/* Footer */}
       <div className=" mt-auto">
         <hr />
         {!previewState.isPreview && (
@@ -120,6 +161,7 @@ export default function Home() {
               iconPosition="before"
               icon="/icons/draft-icon.svg"
               disabled={questions.length === 0}
+              onClick={() => setSaveAsDraft(true)}
             />
             <Button
               text="Publish form"
@@ -133,6 +175,7 @@ export default function Home() {
         )}
       </div>
 
+      {/* Modals */}
       <QuestionsModal
         isOpen={isQuestionsModalOpen}
         onClose={() => setIsQuestionsModalOpen(false)}
@@ -144,6 +187,12 @@ export default function Home() {
         subText="Thank you for submitting your form. We will get back to you soon."
         isOpen={isFormSubmitted}
         onClose={() => setIsFormSubmitted(false)}
+      />
+
+      <SuccessModal
+        title="Form saved as a draft"
+        isOpen={saveAsDraft}
+        onClose={() => setSaveAsDraft(false)}
       />
     </main>
   );

@@ -14,8 +14,17 @@ datasource db {
 }
 
 model Form {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
   title     String
   questions Json
   createdAt DateTime @default(now())
+  responses Response[]
+}
+
+model Response {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  formId    String
+  answers   Json
+  submitted DateTime @default(now())
+  form      Form     @relation(fields: [formId], references: [id])
 }
