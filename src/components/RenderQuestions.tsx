@@ -16,7 +16,8 @@ const InputField = ({
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
 }) => {
-  const commonClasses = "border rounded-lg border-[#E1E4E8] w-full p-2";
+  const commonClasses =
+    "border rounded-lg border-[#E1E4E8] w-full p-2 hover:drop-shadow-sm transition-shadow duration-200";
   const inputProps = previewMode ? {} : { readOnly: true };
 
   switch (type) {
@@ -149,6 +150,8 @@ export const RenderQuestions = ({
     updatedQuestions[index].response = optionValue;
     setQuestions(updatedQuestions);
   };
+
+  console.log(questionsData);
 
   return (
     <div>
@@ -290,11 +293,12 @@ export const RenderQuestions = ({
                         id={`radio-${optionIndex}`}
                         name={`radio-group-${index}`}
                         value={option}
-                        className="p-2"
+                        className="p-2 appearance-none w-2 h-2 border border-[#6A737D] rounded-full transition-all relative checked:bg-white checked:border-[#1E874B] checked:before:bg-[#00AA45] checked:before:absolute before:top-1 before:left-1 before:w-2 before:h-2 before:rounded-full before:bg-[#00AA45]"
                         onChange={() =>
-                          !previewMode && handleRadioChange(index, option)
+                          previewMode && handleRadioChange(index, option)
                         }
                         disabled={!previewMode}
+                        checked={question.response === option}
                       />
                       <input
                         type="text"
@@ -352,3 +356,16 @@ export const RenderQuestions = ({
     </div>
   );
 };
+
+<style jsx>{`
+  input[type="radio"]:checked::before {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: #00aa45;
+  }
+`}</style>;
