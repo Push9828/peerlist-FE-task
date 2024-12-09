@@ -5,17 +5,23 @@ export type ButtonProps = {
   isPrimary?: boolean;
   onClick?: () => void;
   disabled?: boolean;
+  loading?: boolean;
 };
 
 export type ModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  setQuestions: React.Dispatch<React.SetStateAction<QuestionItem[]>>;
+  setQuestions?: React.Dispatch<React.SetStateAction<QuestionItem[]>>;
+  title?: string;
+  subText?: string;
 };
 
 export type questions = {
   questionsData: QuestionItem[];
   setQuestions: React.Dispatch<React.SetStateAction<QuestionItem[]>>;
+  previewMode?: boolean;
+  handleFormSubmit?: () => void;
+  loading?: boolean;
 };
 
 export type QuestionItem = {
@@ -23,4 +29,5 @@ export type QuestionItem = {
   title?: string;
   helpText?: string;
   options?: string[];
+  response?: string;
 };
