@@ -22,6 +22,7 @@ export type questions = {
   previewMode?: boolean;
   handleFormSubmit?: () => void;
   loading?: boolean;
+  questionErrors: boolean[];
 };
 
 export type QuestionItem = {

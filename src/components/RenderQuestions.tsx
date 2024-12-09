@@ -16,8 +16,9 @@ const InputField = ({
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
 }) => {
-  const commonClasses =
-    "border rounded-lg border-[#E1E4E8] w-full p-2 hover:drop-shadow-sm transition-shadow duration-200";
+  const commonClasses = `border rounded-lg border-[#E1E4E8] w-full p-2 hover:drop-shadow-sm transition-shadow duration-200 ${
+    previewMode ? "bg-white " : "bg-[#F6F8FA]"
+  } ${previewMode ? "" : "focus:outline-none"}`;
   const inputProps = previewMode ? {} : { readOnly: true };
 
   switch (type) {
@@ -136,6 +137,7 @@ export const RenderQuestions = ({
   setQuestions,
   previewMode = false,
   handleFormSubmit,
+  questionErrors,
 }: questions) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
 
@@ -162,12 +164,13 @@ export const RenderQuestions = ({
 
         return (
           <div key={index}>
-            <div className="mx-6 mb-6 border border-[#E1E4E8] rounded-lg p-4">
+            <div className="mx-6 mb-6 border border-[#E1E4E8] rounded-lg p-4 hover:bg-[#FAFBFC]">
               <div className="flex justify-between mb-2">
                 <input
                   type="text"
                   placeholder="Write a question"
-                  className="text-sm font-semibold border-none bg-transparent focus:outline-none"
+                  className={` text-sm font-semibold border-none bg-transparent focus:outline-none border
+              ${questionErrors[index] ? "placeholder-[#EB5757]" : ""}`}
                   value={question.title || ""}
                   onChange={(e) =>
                     !previewMode &&
