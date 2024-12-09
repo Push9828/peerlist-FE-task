@@ -82,19 +82,17 @@ export default function Home() {
     } else setPreviewState({ id: null, isPreview: true });
   };
 
-  console.log(progress);
-
   return (
     <main className="flex flex-col min-h-screen max-w-2xl mx-auto border border-[#E1E4E8] ">
       {/* Header */}
 
-      <div className="flex gap-10 px-6 py-4">
+      <div className="flex gap-10 md:justify-between px-6 py-4">
         <input
           type="text"
           placeholder="Untitled Form"
           value={formTitle}
           onChange={handleTitleChange}
-          className={`text-lg w-1/2 font-semibold border-none bg-transparent focus:outline-none  ${
+          className={`text-lg w-1/2  font-semibold border-none bg-transparent focus:outline-none  ${
             formTitleError ? "placeholder-[#EB5757]" : ""
           }`}
         />
