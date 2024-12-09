@@ -1,19 +1,64 @@
 "use client";
 import { useState } from "react";
+import { Button } from "./Button";
 import { QuestionItem, questions } from "@/types/components";
 
-const InputField = ({ type }: { type: number | undefined }) => {
+const InputField = ({
+  type,
+  previewMode,
+  value,
+  onChange,
+}: {
+  type: number | undefined;
+  previewMode: boolean;
+  value: string;
+  onChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => void;
+}) => {
   const commonClasses = "border rounded-lg border-[#E1E4E8] w-full p-2";
+  const inputProps = previewMode ? {} : { readOnly: true };
 
   switch (type) {
     case 1:
-      return <input type="text" className={commonClasses} />;
+      return (
+        <input
+          type="text"
+          className={commonClasses}
+          value={value}
+          onChange={onChange}
+          {...inputProps}
+        />
+      );
     case 2:
-      return <textarea className={commonClasses} />;
+      return (
+        <textarea
+          className={commonClasses}
+          value={value}
+          onChange={onChange}
+          {...inputProps}
+        />
+      );
     case 4:
-      return <input type="url" className={commonClasses} />;
+      return (
+        <input
+          type="url"
+          className={commonClasses}
+          value={value}
+          onChange={onChange}
+          {...inputProps}
+        />
+      );
     case 5:
-      return <input type="date" className={commonClasses} />;
+      return (
+        <input
+          type="date"
+          className={commonClasses}
+          value={value}
+          onChange={onChange}
+          {...inputProps}
+        />
+      );
     default:
       return null;
   }
@@ -40,7 +85,6 @@ const addOption = (
   setQuestions: React.Dispatch<React.SetStateAction<QuestionItem[]>>
 ) => {
   const updatedQuestions = [...questionsData];
-
   const currentOptions = updatedQuestions[index].options || [];
   updatedQuestions[index].options = [...currentOptions, ""];
   setQuestions(updatedQuestions);
@@ -86,8 +130,26 @@ const dropdownOptions = [
   { id: 5, text: "Date", icon: "/icons/date-icon.svg" },
 ];
 
-export const RenderQuestions = ({ questionsData, setQuestions }: questions) => {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+export const RenderQuestions = ({
+  questionsData,
+  setQuestions,
+  previewMode = false,
+  handleFormSubmit,
+}: questions) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
+
+  const handleResponseChange = (index: number, value: string) => {
+    const updatedQuestions = [...questionsData];
+    updatedQuestions[index].response = value;
+    setQuestions(updatedQuestions);
+  };
+
+  const handleRadioChange = (index: number, optionValue: string) => {
+    const updatedQuestions = [...questionsData];
+    updatedQuestions[index].response = optionValue;
+    setQuestions(updatedQuestions);
+  };
+
   return (
     <div>
       {questionsData.map((question, index) => {
@@ -105,6 +167,7 @@ export const RenderQuestions = ({ questionsData, setQuestions }: questions) => {
                   className="text-sm font-semibold border-none bg-transparent focus:outline-none"
                   value={question.title || ""}
                   onChange={(e) =>
+                    !previewMode &&
                     updateQuestionState(
                       index,
                       "title",
@@ -113,86 +176,108 @@ export const RenderQuestions = ({ questionsData, setQuestions }: questions) => {
                       setQuestions
                     )
                   }
+                  readOnly={previewMode}
                 />
-                <div className="flex gap-4 items-center">
-                  <div className="relative">
-                    <button
-                      onClick={() => setIsDropdownOpen((prev) => !prev)}
-                      className="bg-white px-4 py-2 rounded-md flex items-center justify-between w-full"
-                    >
-                      <span className="flex font-semibold text-[#868686] text-xs">
-                        <img
-                          src={
-                            dropdownOptions.find(
-                              (option) => option.id === question.type
-                            )?.icon
-                          }
-                          alt="icon"
-                          className="w-4 h-4"
-                        />
-                        <svg
-                          width="17"
-                          height="17"
-                          viewBox="0 0 17 17"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M4.63965 6.31812L8.63965 10.3181L12.6396 6.31812"
-                            stroke="#0D0D0D"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </span>
-                    </button>
-                    {isDropdownOpen && (
-                      <ul
-                        className={`absolute bg-white border border-[#E1E4E8] rounded-lg shadow-lg w-full mt-2 z-99 origin-top`}
+                {!previewMode && (
+                  <div className="flex gap-4 items-center">
+                    <div className="relative">
+                      <button
+                        onClick={() => setIsDropdownOpen((prev) => !prev)}
+                        className="bg-white px-4 py-2 rounded-md flex items-center justify-between w-full"
                       >
-                        {dropdownOptions.map((option) => (
-                          <li
-                            key={option.id}
-                            className="flex items-center text-xs font-medium px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                            onClick={() => {
-                              handleTypeChange(
-                                index,
-                                option.id,
-                                questionsData,
-                                setQuestions
-                              );
-                              setIsDropdownOpen((prev) => !prev);
-                            }}
+                        <span className="flex font-semibold text-[#868686] text-xs">
+                          <img
+                            src={
+                              dropdownOptions.find(
+                                (option) => option.id === question.type
+                              )?.icon
+                            }
+                            alt="icon"
+                            className="w-4 h-4"
+                          />
+
+                          <svg
+                            width="17"
+                            height="17"
+                            viewBox="0 0 17 17"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
                           >
-                            <img src={option.icon} alt={option.text} />
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                            <path
+                              d="M4.63965 6.31812L8.63965 10.3181L12.6396 6.31812"
+                              stroke="#0D0D0D"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </span>
+                      </button>
+                      {isDropdownOpen && (
+                        <ul
+                          className={`absolute bg-white border border-[#E1E4E8] rounded-lg shadow-lg w-full mt-2 z-99 origin-top`}
+                        >
+                          {dropdownOptions.map((option) => (
+                            <li
+                              key={option.id}
+                              className="flex items-center text-xs font-medium px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                              onClick={() => {
+                                if (!previewMode) {
+                                  handleTypeChange(
+                                    index,
+                                    option.id,
+                                    questionsData,
+                                    setQuestions
+                                  );
+                                }
+                                setIsDropdownOpen((prev) => !prev);
+                              }}
+                            >
+                              <img src={option.icon} alt={option.text} />
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+
+                    <img
+                      src="/icons/dots-icon.svg"
+                      alt="icon"
+                      className="w-4 h-4"
+                    />
                   </div>
-                  <img
-                    src="/icons/dots-icon.svg"
-                    alt="icon"
-                    className="w-4 h-4"
-                  />
-                </div>
+                )}
               </div>
-              <input
-                type="text"
-                placeholder="Help text"
-                className="text-sm border-none bg-transparent focus:outline-none mb-2"
-                value={question.helpText || ""}
-                onChange={(e) =>
-                  updateQuestionState(
-                    index,
-                    "helpText",
-                    e.target.value,
-                    questionsData,
-                    setQuestions
-                  )
-                }
-              />
+              {question.helpText &&
+                question.helpText?.length > 0 &&
+                previewMode && (
+                  <input
+                    type="text"
+                    placeholder="Help text"
+                    className="text-sm border-none bg-transparent focus:outline-none mb-2"
+                    value={question.helpText}
+                    readOnly={previewMode}
+                  />
+                )}
+              {!previewMode && (
+                <input
+                  type="text"
+                  placeholder="Help text"
+                  className="text-sm border-none bg-transparent focus:outline-none mb-2"
+                  value={question.helpText || ""}
+                  onChange={(e) =>
+                    !previewMode &&
+                    updateQuestionState(
+                      index,
+                      "helpText",
+                      e.target.value,
+                      questionsData,
+                      setQuestions
+                    )
+                  }
+                />
+              )}
+
               {question.type === 3 && question.options ? (
                 <div>
                   {question.options.map((option, optionIndex) => (
@@ -206,11 +291,16 @@ export const RenderQuestions = ({ questionsData, setQuestions }: questions) => {
                         name={`radio-group-${index}`}
                         value={option}
                         className="p-2"
+                        onChange={() =>
+                          !previewMode && handleRadioChange(index, option)
+                        }
+                        disabled={!previewMode}
                       />
                       <input
                         type="text"
                         value={option}
                         onChange={(e) =>
+                          !previewMode &&
                           updateOption(
                             index,
                             optionIndex,
@@ -221,10 +311,12 @@ export const RenderQuestions = ({ questionsData, setQuestions }: questions) => {
                         }
                         placeholder={`Option ${optionIndex + 1}`}
                         className="border rounded-lg border-[#E1E4E8] w-full p-2 text-sm"
+                        readOnly={previewMode}
                       />
                       {question.options &&
                         optionIndex === question.options.length - 1 &&
-                        optionIndex < 3 && (
+                        optionIndex < 3 &&
+                        !previewMode && (
                           <button
                             type="button"
                             onClick={() =>
@@ -239,12 +331,24 @@ export const RenderQuestions = ({ questionsData, setQuestions }: questions) => {
                   ))}
                 </div>
               ) : (
-                <InputField type={question?.type} />
+                <InputField
+                  type={question.type}
+                  previewMode={previewMode}
+                  value={question.response || ""}
+                  onChange={(e) =>
+                    previewMode && handleResponseChange(index, e.target.value)
+                  }
+                />
               )}
             </div>
           </div>
         );
       })}
+      {previewMode && (
+        <div className="flex justify-end mr-4">
+          <Button text="Submit" onClick={handleFormSubmit} />
+        </div>
+      )}
     </div>
   );
 };
